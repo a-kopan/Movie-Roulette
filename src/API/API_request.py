@@ -1,3 +1,4 @@
+#sends multiple API requests and returns a list with all json responses
 import requests
 import sys
 
