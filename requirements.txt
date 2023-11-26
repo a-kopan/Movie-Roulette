@@ -2,3 +2,4 @@ tkinter
 json
 requests
 sys
+sqlite3
