@@ -18,6 +18,28 @@ class Movie:
         self.vote_average = vote_average
         self.vote_count = vote_count
 
+    # A constructor but suited for scenario of loading Movie from the database,
+    # instead of genre_ids you get genres, which are a string representation of genre ids
+    @classmethod
+    def loaded(
+        self,
+        title: str = "Undefined",
+        adult: int = 1,
+        poster_path: str = "",
+        genres: list = [],
+        release_year: int = 9999,
+        vote_average: int = 0,
+        vote_count: int = 0,
+    ):
+        self.title = title
+        self.adult = adult == 1
+        self.poster_path = poster_path
+        self.genres = genres
+        self.release_year = release_year
+        self.vote_average = vote_average
+        self.vote_count = vote_count
+        return self
+
     def __str__(self) -> str:
         return f"""Title: {self.title}
 Adult: {self.adult}
