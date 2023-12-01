@@ -81,10 +81,10 @@ def load_from_db(db: str, table_name: str, requirements: dict) -> list:
                        SELECT *
                        FROM {table_name}
                        WHERE
-                       vote_average < {requirements['max_rating']} AND 
-                       vote_average > {requirements['min_rating']} AND 
-                       release_year > {requirements['min_production_year']} AND 
-                       release_year < {requirements['max_production_year']}
+                       vote_average <= {requirements['max_rating']} AND 
+                       vote_average >= {requirements['min_rating']} AND 
+                       release_year >= {requirements['min_production_year']} AND 
+                       release_year <= {requirements['max_production_year']}
                        """
     ).fetchall()
 

@@ -1,4 +1,4 @@
-# Movie class, used for easier python -> sql_database transformation
+# Movie class, used for easier python->sql_database, and sql_database->python transformation
 class Movie:
     def __init__(
         self,

@@ -12,11 +12,11 @@ def main():
     dbc.create_table(db_path, table_name)
     dbc.load_to_db(db_path, table_name, movies)
 
-    temp_requirements = dict()
-    temp_requirements["min_rating"] = -1
-    temp_requirements["max_rating"] = 11
-    temp_requirements["min_production_year"] = -1
-    temp_requirements["max_production_year"] = 9999
+    temp_requirements = {
+    "min_rating":6,
+    "max_rating":7,
+    "min_production_year":-1,
+    "max_production_year":9999}
 
     movies_from_db = dbc.load_from_db(db_path, table_name, temp_requirements)
     a = 0
