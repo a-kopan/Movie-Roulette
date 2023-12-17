@@ -3,9 +3,9 @@ class Movie:
     def __init__(
         self,
         title: str = "Undefined",
-        adult: bool = True,
+        adult: bool = False,
         poster_path: str = "",
-        genre_ids: list = [],
+        genre_ids: list = [28, 12, 16, 35, 80, 99, 18, 10751, 14, 36, 27, 10402, 9648, 10749, 878, 10770, 53, 10752, 37,],
         release_year: int = 9999,
         vote_average: int = 0,
         vote_count: int = 0,
@@ -24,15 +24,15 @@ class Movie:
     def loaded(
         self,
         title: str = "Undefined",
-        adult: int = 1,
+        adult: int = 0,
         poster_path: str = "",
-        genres: list = [],
+        genres: list = [28, 12, 16, 35, 80, 99, 18, 10751, 14, 36, 27, 10402, 9648, 10749, 878, 10770, 53, 10752, 37,],
         release_year: int = 9999,
         vote_average: int = 0,
         vote_count: int = 0,
     ):
         self.title = title
-        self.adult = adult == 1
+        self.adult = (adult == 1)
         self.poster_path = poster_path
         self.genres = genres
         self.release_year = release_year
@@ -42,6 +42,7 @@ class Movie:
 
     def __str__(self) -> str:
         return f"""Title: {self.title}
+    
 Adult: {self.adult}
 Poster_path: {self.poster_path}
 Genre_ids: {self.genres}
