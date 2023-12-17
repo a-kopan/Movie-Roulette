@@ -3,3 +3,4 @@ json
 requests
 sys
 sqlite3
+idlelib.tooltip
