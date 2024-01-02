@@ -4,29 +4,37 @@
 from tkinter import *
 from src.Movie import Movie
 import requests
-from PIL import ImageTk
-
+from PIL import Image
+from io import BytesIO
 #Frame which will show the miniature version of saved position
 class MovieTile(Frame):
-    
     # Download the poster data using requests, and load it into the variable
-    def download_image(url:str, master:Frame):
+    def download_image(master:Frame, url:str):
+        if not url: return Image.new(mode='RGB', size=(666,666), color='white')
         response = requests.get(url)
-        if not response.status_code=='200': return ImageTk.PhotoImage()
-        image = ImageTk.PhotoImage(data=response.content)
+        if not response.status_code==200: return requests.ConnectionError()
+        image = Image.open(BytesIO(response.content))
+        
         return image
     
-    #Later all atributes will be used to load the movie onto the main window
-    def __init__(self, master:Frame, data:Movie, remove_from_queue):
+    def remove_self_from_queue(self):
+        self.self_removal(self)
+        
+    def __init__(self, master:Frame, data:Movie, remove_from_queue, is_template=False):
         super().__init__()
 
-        is_adult:str = "Yes" if data.adult else "No"
+        if is_template:
+            data.genres="Undefined"
+        self.self_removal = remove_from_queue
+        is_adult:str = "yes" if data.adult else "no"
+        self.display_info = f"Title: {data.title}\nGenres: {data.genres}\nYear: {data.release_year}\nScore: {data.vote_average}\nVote Count: {data.vote_count}\n18+: {is_adult}\n"
         
         #'big' part
         self.text:Label = Label(master=master,
-                                text=f"Title: {data.title}\nGenres: {data.genres}\nYear: {data.release_year}\nScore: {data.vote_average}\nVote Count: {data.vote_count}\n18+: {is_adult}\n",
+                                text= self.display_info,
                                 font=("Times New Roman", 30))
-        self.image:ImageTk.PhotoImage = self.download_image(data.poster_path)
+        
+        self.image:Image = self.download_image(data.poster_path)
         self.saved:bool = False
         
         #'small' part
@@ -41,5 +49,5 @@ class MovieTile(Frame):
         self.grid(column=0, sticky="nsew")
         
         #-A remove button (button for removing it from the queue)
-        self.remove = Button(master=self, text="Remove", bg='red', fg='white', function=remove_from_queue(self))
+        self.remove = Button(master=self, text="Remove", bg='red', fg='white', command=self.remove_self_from_queue)
         self.grid(column=1, sticky="nsew")
