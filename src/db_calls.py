@@ -1,5 +1,5 @@
 import sqlite3
-from .Movie import Movie
+from src.Movie import Movie
 
 
 # creates the table inside database
@@ -45,7 +45,8 @@ def load_to_db(db: str, table_name: str, Movies: list) -> None:
             movie.title,
             int(movie.adult),
             movie.poster_path,
-            " ".join(movie.genres),
+            #" ".join(movie.genres),
+            movie.genres,
             movie.release_year,
             movie.vote_average,
             movie.vote_count,
@@ -58,23 +59,26 @@ def load_to_db(db: str, table_name: str, Movies: list) -> None:
     cur.close()
     con.close()
 
-
-# cant really tell if this is necessary
-# loads specific Movies from database
 """
 requirements = (min_rating: int = -1
                 max_rating: int = 11
                 min_production_year: int = -1
                 max_production_year: int = 9999
+                genre_to_get = 'Horror'
                 )
 """
 
 
+# loads specific Movies from database
 def load_from_db(db: str, table_name: str, requirements: dict) -> list:
     # connection to database
     con = sqlite3.connect(db)
     cur = con.cursor()
-
+    #List that represents the query for loading movies that have given genres one by one
+    query_genre = []
+    for genre in requirements['genre_to_get'].split(' '):
+        query_genre.append(f"AND genres LIKE '%{genre}%'")
+    
     # query to get all the positions that meet certain requirements
     rows: list[tuple] = cur.execute(
         f"""
@@ -84,16 +88,18 @@ def load_from_db(db: str, table_name: str, requirements: dict) -> list:
                        vote_average <= {requirements['max_rating']} AND 
                        vote_average >= {requirements['min_rating']} AND 
                        release_year >= {requirements['min_production_year']} AND 
-                       release_year <= {requirements['max_production_year']}
+                       release_year <= {requirements['max_production_year']} 
+                       {' '.join(query_genre)}
                        """
     ).fetchall()
 
     # a list which will keep rows changed into Movies
-    movies = list()
+    movies = []
 
     # change rows into Movie objects and add them to movies
     for position in rows:
-        movies.append(Movie.loaded(*position[1:]))
+        movie = Movie(*position[1:])
+        movies.append(movie)
 
     return movies
 
