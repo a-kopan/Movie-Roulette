@@ -1,5 +1,6 @@
 import src.db_calls as dbc
 import src.API.API_request as apir
+from src.API.json_to_Movie import genre_list
 from src.GUI.result_window import ResultWindow
 from src.API.json_to_Movie import responses_to_movies
 from tkinter import *
@@ -118,7 +119,7 @@ class MainWindow(Tk):
         
         #Code for movie genre
         current_genre = self.strvar_curr_category.get()
-        code = [val for (key,val) in genres.items() if key==current_genre][0]
+        code = [val for (key,val) in genre_list.items() if key==current_genre][0]
         
         #Send API request for all movies
         all_movies = apir.send_n_API_requests_with_key(category_code=code, n_of_pages=3, API_KEY=API_KEY)
@@ -141,13 +142,14 @@ class MainWindow(Tk):
     
     # Passes filtered movies to the result window
     def pass_to_second_window(self, filtered_movies):
-        # Close the current window
-        self.withdraw()
-        
+
+
         # Open the second window
         result_window = ResultWindow(filtered_movies)
+        self.withdraw()
         result_window.mainloop()
-
+        
+        
     def __init__(self, db_name, table_name):
         super().__init__()
         self.db_name = db_name
@@ -274,11 +276,11 @@ class MainWindow(Tk):
         self.label_category.grid(row=1,column=0, sticky="nsew", padx=10)
         
         self.strvar_curr_category = StringVar(frame_category)
-        self.strvar_curr_category.set(list(genres.keys())[0])
+        self.strvar_curr_category.set(list(genre_list.keys())[0])
         
         self.optionMenu_category = OptionMenu(frame_category,
                                               self.strvar_curr_category,
-                                              *genres.keys(),)
+                                              *genre_list.keys(),)
         self.optionMenu_category.grid(row=1, column=0,sticky="e")
         rows, columns = frame_category.grid_size()
         # --------------------------------------------------------------------#

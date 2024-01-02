@@ -1,9 +1,12 @@
 from tkinter import *
 from src.Movie import Movie
-from result_window_methods import *
-
+from MovieTile import MovieTile
+import src.db_calls as dbc
+from PIL import ImageTk, Image
 # Window which shows filtered movies and such
-class ResultWindow(Tk):
+class ResultWindow(Toplevel):
+    
+    # Load the choosen 
     # Method for coloring columns/rows (only for checking during development)
     def color_rows_and_columns(self, c):
         if c:
@@ -31,12 +34,93 @@ class ResultWindow(Tk):
 
     # On the GUI assemble, load 2 movie templates into a queue
     # One for the space before first movie, second for marking the end of the queue ()
+    # Add the first and last movie templates into the queue
+    def add_templates(self, movies:list[MovieTile]):
+        movie_f = Movie("Start")
+        self.first_template = MovieTile(master=self.frame_fill_canvas, data= movie_f, remove_from_queue=self.remove_from_queue, is_template=True)
+        movie_s = Movie("End")
+        self.last_template = MovieTile(master=self.frame_fill_canvas, data= movie_s, remove_from_queue=self.remove_from_queue, is_template=True)
+        
+        movies.insert(0,self.first_template)
+        movies.append(self.last_template)
+         
+    # Remove given tile from the movie queue
+    def remove_from_queue(self, tile:MovieTile):
+        self.queue.remove(tile)
     
-    def __init__(self, movies:list[Movie]):
+    # Remove given tile from the saved list    
+    def remove_from_saved(self):
+        tile = self.current
+        self.saved.remove(tile)
+        tile.saved = False
+        self.button_save_remove.config(bg='green',
+                                           text="SAVE",
+                                           command=self.add_to_saved)
+    
+    # Add given tile to saved list
+    def add_to_saved(self):
+        tile = self.current
+        if not tile in self.saved:
+            self.saved.append(tile)
+            tile.saved = True
+            self.button_save_remove.config(bg='red',
+                                           text="REMOVE",
+                                           command=self.remove_from_saved)
+            
+    # Scale image to the size of the frame that shows it
+    def scale_image(self, image:Image):
+        new_size = (self.canvas_poster.winfo_width() ,self.canvas_poster.winfo_height())
+        image = image.resize(size=new_size)
+        return image
+    
+    # Change the size of image to make it fit into the poster Frame
+    def load_image(self, image):
+        # Delete previously shown image
+        self.canvas_poster.delete('all')
+        # Scale the image to good dimensions
+        image = self.scale_image(image)
+        image = ImageTk.PhotoImage(image=image)
+        # Hold the reference to image so it doesn't disappear on the spot
+        self.images.append(image)
+        self.canvas_poster.create_image(0,0, anchor='nw', image=image)
+        
+    #Load singular MovieTile's details into the GUI
+    def load_tile(self, tile:MovieTile):
+        # Load the text details
+        self.stringvar_info.set(tile.display_info)
+        
+        # If image is avaliable, load it
+        if tile.image: self.load_image(tile.image)
+        
+    # Refresh and check if the logic-gui relation
+    def refresh_window(self):
+        
+        # Change the save button if needed
+        if self.current.saved:
+            self.button_save_remove.config(bg='red',
+                                           text="REMOVE",
+                                           command=self.remove_from_saved)
+        else:
+            self.button_save_remove.config(bg='green',
+                                           text="SAVE",
+                                           command=self.add_to_saved)
+        
+        #If the current tile is the last one, block the draw button
+        if self.current is self.last_template:
+            self.button_draw.config(state=DISABLED, bg='grey')
+        
+    # Draw the next movie and get delete the current one from the queue
+    def draw_next(self):
+        # Change the current tile
+        self.current = self.queue.pop(0)
+        # Load current tile
+        self.load_tile(self.current)
+        # Refresh window
+        self.refresh_window()
+        
+    def __init__(self,movies:list[Movie]):
+        #Section for GUI
         super().__init__()
-
-        # Load the movie templates into the queue
-        add_templates(movies)
         
         # Background and text color 
         background_color = "#{:02x}{:02x}{:02x}".format(52, 53, 65)
@@ -48,7 +132,7 @@ class ResultWindow(Tk):
         self.configure(bg=background_color)
     
         # Configure the columns
-        self.columnconfigure(0, weight=1)
+        self.columnconfigure(0, weight=6)
         self.columnconfigure(1, weight=1)
         self.columnconfigure(2, weight=1)
         
@@ -56,60 +140,110 @@ class ResultWindow(Tk):
         self.rowconfigure(0, weight=1)
         self.rowconfigure(1, weight=0)  
         
-        self.color_rows_and_columns(False)
+        #self.color_rows_and_columns(False)
         
         # Column 1
         
+        
+        #Movie poster canvas
+        self.canvas_poster = Canvas(self, borderwidth=0, highlightthickness=0, bg=background_color)
+        self.canvas_poster.grid(column=0, row=0, sticky="nsew", padx=10)
+        
         #Movie image Frame
-        frame_poster = Frame(master=self, bg="red")
-        frame_poster.grid(column=0,row=0,sticky="nsew", padx=10, pady=10)
+        self.frame_poster = Frame(master=self.canvas_poster)
+        self.frame_poster.grid(column=0,row=0,sticky="nsew")
+        
         
         #Button for saving/removing
-        button_save_remove = Button(master=self, text="SAVE", bg="lightblue", font=("Times New Roman", 30))
-        button_save_remove.grid(column=0, row=1, padx=10, pady=10, sticky="nsew")
+        self.button_save_remove = Button(master=self, text="SAVE", bg="lightblue", font=("Times New Roman", 30), command=self.add_to_saved)
+        self.button_save_remove.grid(column=0, row=1, padx=10, pady=10, sticky="nsew")
+        
         
         # Column 2
         
         # Frame for text info
-        frame_text_information = Frame(master=self, bg="yellow")
-        frame_text_information.grid(column=1, row=0, padx=10, pady=10, sticky="nsew")
+        self.frame_text_information = Frame(master=self)
+        self.frame_text_information.grid(column=1, row=0, padx=10, pady=10, sticky="ns")
         
-        # Text info
+        # String var that holds current text info displayed
+        self.stringvar_info = StringVar()
+        
+        # Displayed information about a current tile
+        self.label_text_info = Label(master=self.frame_text_information,
+                                     font=("Times New Roman", 30),
+                                     bg=background_color,
+                                     fg=text_color,
+                                     textvariable=self.stringvar_info)
+        self.label_text_info.pack(anchor=CENTER, fill=BOTH, expand=True)
         
         # Button for drawing again
-        button_save_remove = Button(master=self, text="DRAW", bg="green", font=("Times New Roman", 30))
-        button_save_remove.grid(column=1, row=1, padx=10, pady=10, sticky="nsew")
+        self.button_draw = Button(master=self, text="DRAW", bg="green", font=("Times New Roman", 30), command=self.draw_next)
+        self.button_draw.grid(column=1, row=1, padx=10, pady=10, sticky="nsew")
         
         # Column 3 
         
         # Frame for label "saved positions"
-        frame_top_bar = Frame(master=self, bg="lightblue",height=30)
-        frame_top_bar.grid(column=2,row=0,sticky="new", pady=10,padx=(10,0))
+        self.frame_top_bar = Frame(master=self, bg="lightblue",height=30)
+        self.frame_top_bar.grid(column=2,row=0,sticky="new", pady=10,padx=(10,0))
         
         # Label "saved positions"
-        label_top_bar = Label(master=frame_top_bar, text="saved positions",font=("Times New Roman", 15),bg=frame_top_bar.cget('bg'))
-        label_top_bar.pack(anchor=CENTER)
+        self.label_top_bar = Label(master=self.frame_top_bar, text="saved positions",font=("Times New Roman", 15),bg=self.frame_top_bar.cget('bg'))
+        self.label_top_bar.pack(anchor=CENTER)
 
         # Canvas for saved positions
-        canvas_saved_movies = Canvas(master=self, bg="green", borderwidth=0, highlightthickness=0)
-        canvas_saved_movies.grid(column=2, row=0, sticky="nsew", pady=(frame_top_bar.cget('height')+10,10), padx=(10,0))
+        self.canvas_saved_movies = Canvas(master=self, bg="green", borderwidth=0, highlightthickness=0)
+        self.canvas_saved_movies.grid(column=2, row=0, sticky="nsew", pady=(self.frame_top_bar.cget('height')+10,10), padx=(10,0))
         
         # Frame within the canvas
-        frame_fill_canvas = Frame(master=canvas_saved_movies, bg="darkgreen")
-        frame_fill_canvas.pack()
+        self.frame_fill_canvas = Frame(master=self.canvas_saved_movies, bg="darkgreen")
+        self.frame_fill_canvas.pack()
         
         # Scroll for the saved positions section
-        scroll_saved = Scrollbar(canvas_saved_movies, orient="vertical", command=canvas_saved_movies.yview)
-        scroll_saved.pack(side="right", fill="y")
+        self.scroll_saved = Scrollbar(self.canvas_saved_movies, orient="vertical", command=self.canvas_saved_movies.yview)
+        self.scroll_saved.pack(side="right", fill="y")
         
         # Box for warning about the current movie
-        frame_warning = Frame(master=self, bg="red")
-        frame_warning.grid(column=2,row=1,sticky="nsew",padx=10)
+        self.frame_warning = Frame(master=self, bg="red")
+        self.frame_warning.grid(column=2,row=1,sticky="ns",padx=10)
         
         # Warning about the current movie
-        label_warning = Label(master=frame_warning, text="Warning, if you switch to saved movie", font=("Times New Roman", 15), bg=frame_warning.cget('bg'))
-        label_warning.pack(anchor=CENTER, fill=BOTH, expand=True)
+        self.label_warning = Label(master=self.frame_warning, text="Warning, if you switch to saved movie, the currently chosen one will be lost.", font=("Times New Roman", 15), bg=self.frame_warning.cget('bg'))
+        self.label_warning.pack(anchor=CENTER, fill=BOTH, expand=True)
+
+        # Section for logic
+        
+        # Main queue for movies (not yet visited)
+        #Fill the queue with all filtered MovieTile objects made out of Movie objects
+        self.queue:list[MovieTile] = [MovieTile(master=self.frame_fill_canvas, data=movie, remove_from_queue=self.remove_from_queue) for movie in movies]
+        
+        # Keep the reference to each photo so they don't appear as white boxes
+        self.images = []
+        
+        # List for saved MovieTiles
+        self.saved = []
+        
+        # Add first and last templates into the movies section
+        self.add_templates(self.queue)
+        
+        #Currently choosen tile
+        self.current:MovieTile = self.queue[0]
+        
+        # On window appear, load the first template
+        self.draw_next()
+        
+        
         
 if __name__=="__main__":
-    window = ResultWindow([])
+    db_path = r"database\Movie_db.db"
+    table_name = "Movies_table"
+    temp_requirements = {
+    "min_rating":6,
+    "max_rating":7,
+    "min_production_year":-1,
+    "max_production_year":9999,
+    "genre_to_get":"Horror"}
+    
+    movies_from_db = dbc.load_from_db(db_path, table_name, temp_requirements)
+    window = ResultWindow(movies=movies_from_db)
+
     window.mainloop()
