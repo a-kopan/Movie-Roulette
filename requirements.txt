@@ -4,3 +4,5 @@ requests
 sys
 sqlite3
 idlelib.tooltip
+io
+PIL
