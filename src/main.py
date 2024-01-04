@@ -4,8 +4,8 @@ import src.db_calls as dbc
 
 def main():
     test_json = open(r"tests\test_json.json", encoding="utf-8")
+    
     movies = jtM.responses_to_movies(test_json.read())
-    # [print(movie.title, end="\n") for movie in movies]
     db_path = r"database\Movie_db.db"
     table_name = "Movies_table"
     dbc.clear_table(db_path, table_name)

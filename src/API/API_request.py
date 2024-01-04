@@ -1,7 +1,7 @@
 # sends multiple API requests and returns a list with all json responses
 import requests
 import sys
-
+import json
 
 def load_API_key_from_file() -> str:
     # check if the file is in the repo, if it isn't then just quit
@@ -38,7 +38,7 @@ def send_n_API_requests_with_key(category_code: int, n_of_pages: int, API_KEY:st
         json_responses.append(response)
     return json_responses
 
-def send_n_API_requests(category_code: int, n_of_pages: int) -> list:
+def send_n_API_requests(category_code: int, n_of_pages: int) -> json:
     API_KEY = load_API_key_from_file()
 
     # set that holds all json responses
@@ -51,7 +51,8 @@ def send_n_API_requests(category_code: int, n_of_pages: int) -> list:
 
 if __name__ == "__main__":
     CATEGORY = ("Horror", 80)
-
+    API_KEY = load_API_key_from_file()
     json_file = send_n_API_requests(CATEGORY[1], 1)
 
+    
     print(json_file)

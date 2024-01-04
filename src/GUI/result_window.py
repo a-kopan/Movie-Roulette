@@ -150,7 +150,7 @@ class ResultWindow(Toplevel):
         self.columnconfigure(0, weight=6)
         self.columnconfigure(1, weight=1)
         self.columnconfigure(2, weight=1)
-        
+
         # Configure the rows
         self.rowconfigure(0, weight=1)
         self.rowconfigure(1, weight=0)  
@@ -205,8 +205,7 @@ class ResultWindow(Toplevel):
         # Frame with saved movies
         self.frame_saved_movies = Frame(master=self, bg=self.background_color)
         self.frame_saved_movies.grid(column=2, row=0, sticky="nsew", pady=(self.frame_top_bar.cget('height')+10,10), padx=(10,0))
-        
-
+      
         # Box for warning about the current movie
         self.frame_warning = Frame(master=self, bg=self.background_color)
         self.frame_warning.grid(column=2,row=1,sticky="ns")
@@ -242,8 +241,8 @@ if __name__=="__main__":
     db_path = r"database\Movie_db.db"
     table_name = "Movies_table"
     temp_requirements = {
-    "min_rating":7,
-    "max_rating":8,
+    "min_rating":0,
+    "max_rating":11,
     "min_production_year":-1,
     "max_production_year":9999,
     "genre_to_get":"Horror"}

@@ -1,5 +1,6 @@
 import src.db_calls as dbc
 import src.API.API_request as apir
+import json
 from src.API.json_to_Movie import genre_list
 from src.GUI.result_window import ResultWindow
 from src.API.json_to_Movie import responses_to_movies
@@ -122,7 +123,13 @@ class MainWindow(Tk):
         code = [val for (key,val) in genre_list.items() if key==current_genre][0]
         
         #Send API request for all movies
-        all_movies = apir.send_n_API_requests_with_key(category_code=code, n_of_pages=3, API_KEY=API_KEY)
+        list_of_responses = apir.send_n_API_requests_with_key(category_code=code, n_of_pages=1, API_KEY=API_KEY)
+        
+        #The json file for the list of responses
+        json_response = json.dumps(list_of_responses)
+        
+        #Change the json_response into the list of movies
+        all_movies = responses_to_movies(json_response)
         
         #Load the movies into the database
         dbc.load_to_db(self.db_name, self.table_name, all_movies)
