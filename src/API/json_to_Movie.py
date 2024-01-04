@@ -1,5 +1,5 @@
-# filters requests from json format to Movie class
-from src.Movie import Movie
+# Filters requests from json format to Movie class
+from ..Movie import Movie
 import json
 
 
@@ -9,7 +9,13 @@ def json_to_Movie(json_object: json) -> Movie:
         title=json_object["title"],
         adult=json_object["adult"],
         poster_path=json_object["poster_path"],
-        genres=' '.join([name for (name, id) in genre_list.items() if id in json_object["genre_ids"]]),
+        genres=" ".join(
+            [
+                name
+                for (name, id) in genre_list.items()
+                if id in json_object["genre_ids"]
+            ]
+        ),
         release_year=int(json_object["release_date"].split("-")[0]),
         vote_average=json_object["vote_average"],
         vote_count=json_object["vote_count"],
@@ -32,6 +38,7 @@ def responses_to_movies(list_of_responses: json) -> list:
     for response_list in list_of_responses:
         movies.extend(response_to_movies(response_list))
     return movies
+
 
 genre_list = {
     "Action": 28,

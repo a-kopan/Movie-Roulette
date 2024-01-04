@@ -3,12 +3,15 @@ import requests
 import sys
 import json
 
+
 def load_API_key_from_file() -> str:
     # check if the file is in the repo, if it isn't then just quit
     try:
         f = open("API_KEY.txt")
     except:
-        input("No file named API_KEY.txt found.\n Try creating it in the repository and check if the name is right.")
+        input(
+            "No file named API_KEY.txt found.\n Try creating it in the repository and check if the name is right."
+        )
         sys.exit()
     else:
         API_KEY = f.read()
@@ -30,13 +33,17 @@ def send_API_request(category_code: int, page: int, API_KEY: str) -> str:
     response = requests.get(URL, headers=headers, params=querystring)
     return response.json()
 
-def send_n_API_requests_with_key(category_code: int, n_of_pages: int, API_KEY:str) -> list:
+
+def send_n_API_requests_with_key(
+    category_code: int, n_of_pages: int, API_KEY: str
+) -> list:
     # set that holds all json responses
     json_responses = []
     for page_num in range(0, n_of_pages):
         response = send_API_request(category_code, page_num + 1, API_KEY)
         json_responses.append(response)
     return json_responses
+
 
 def send_n_API_requests(category_code: int, n_of_pages: int) -> json:
     API_KEY = load_API_key_from_file()
@@ -47,12 +54,3 @@ def send_n_API_requests(category_code: int, n_of_pages: int) -> json:
         response = send_API_request(category_code, page_num + 1, API_KEY)
         json_responses.append(response)
     return json_responses
-
-
-if __name__ == "__main__":
-    CATEGORY = ("Horror", 80)
-    API_KEY = load_API_key_from_file()
-    json_file = send_n_API_requests(CATEGORY[1], 1)
-
-    
-    print(json_file)

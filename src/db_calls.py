@@ -1,5 +1,5 @@
 import sqlite3
-from src.Movie import Movie
+from .Movie import Movie
 
 
 # creates the table inside database
@@ -45,7 +45,7 @@ def load_to_db(db: str, table_name: str, Movies: list) -> None:
             movie.title,
             int(movie.adult),
             movie.poster_path,
-            #" ".join(movie.genres),
+            # " ".join(movie.genres),
             movie.genres,
             movie.release_year,
             movie.vote_average,
@@ -58,6 +58,7 @@ def load_to_db(db: str, table_name: str, Movies: list) -> None:
 
     cur.close()
     con.close()
+
 
 """
 requirements = (min_rating: int = -1
@@ -74,11 +75,11 @@ def load_from_db(db: str, table_name: str, requirements: dict) -> list:
     # connection to database
     con = sqlite3.connect(db)
     cur = con.cursor()
-    #List that represents the query for loading movies that have given genres one by one
+    # List that represents the query for loading movies that have given genres one by one
     query_genre = []
-    for genre in requirements['genre_to_get'].split(' '):
+    for genre in requirements["genre_to_get"].split(" "):
         query_genre.append(f"AND genres LIKE '%{genre}%'")
-    
+
     # query to get all the positions that meet certain requirements
     rows: list[tuple] = cur.execute(
         f"""
