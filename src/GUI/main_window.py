@@ -158,6 +158,7 @@ class MainWindow(Tk):
         background_color = "#{:02x}{:02x}{:02x}".format(52, 53, 65)
         text_color = "#{:02x}{:02x}{:02x}".format(180, 180, 180)
         button_color = "#{:02x}{:02x}{:02x}".format(42, 42, 42)
+        
         # App setup
         self.title("Movie Roulette")
         self.geometry("1200x700")
