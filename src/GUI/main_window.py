@@ -12,43 +12,6 @@ from ..API.json_to_Movie import responses_to_movies
 
 # Main window to which requirements for movie filtering are provided
 class MainWindow(Tk):
-    # Colors rows/columns ()
-    def color_rows_and_columns(self, c):
-        if c:
-            # frames with color visual for each column
-            # column 0
-            frame_c_0 = Frame(self, background="grey")
-            frame_c_0.grid(column=0, row=0, rowspan=5, sticky="nsew")
-
-            # column 1
-            frame_c_1 = Frame(self, background="lightgrey")
-            frame_c_1.grid(column=1, row=0, rowspan=5, sticky="nsew")
-        else:
-            # frames with colors for each row
-            # row 0
-            frame_r_0 = Frame(self, background="grey")
-            frame_r_0.grid(column=0, row=0, columnspan=3, sticky="nsew")
-
-            # row 1
-            frame_r_1 = Frame(self, background="lightgrey")
-            frame_r_1.grid(column=0, row=1, columnspan=3, sticky="nsew")
-
-            # row 2
-            frame_r_2 = Frame(self, background="grey")
-            frame_r_2.grid(column=0, row=2, columnspan=3, sticky="nsew")
-
-            # row 3
-            frame_r_3 = Frame(self, background="lightgrey")
-            frame_r_3.grid(column=0, row=3, columnspan=3, sticky="nsew")
-
-            # row 4
-            frame_r_4 = Frame(self, background="darkgrey")
-            frame_r_4.grid(column=0, row=4, columnspan=3, sticky="nsew")
-
-            # row 5
-            frame_r_5 = Frame(self, background="lightblue")
-            frame_r_5.grid(column=0, row=4, columnspan=3, sticky="nsew")
-
     # Made for easier implementation of the requirement segments (label and 2 entries)
     # Returns list of StringVars for each entry window
     def set_requirement_segment(
@@ -126,9 +89,6 @@ class MainWindow(Tk):
             self.show_warning()
             return
 
-        # First, clear the database
-        dbc.clear_table(self.db_name, self.table_name)
-
         # Code for movie genre
         current_genre = self.strvar_curr_category.get()
         code = [val for (key, val) in genre_list.items() if key == current_genre][0]
@@ -137,7 +97,16 @@ class MainWindow(Tk):
         list_of_responses = apir.send_n_API_requests_with_key(
             category_code=code, n_of_pages=1, API_KEY=API_KEY
         )
+        
+        #If the API key is wrong, show a warning message
+        if list_of_responses[0]['message'] == 'You are not subscribed to this API.':
+            self.show_warning()
+            return
+        
+        # Clear the database
+        dbc.clear_table(self.db_name, self.table_name)
 
+        
         # The json file for the list of responses
         json_response = json.dumps(list_of_responses)
 
@@ -152,7 +121,7 @@ class MainWindow(Tk):
 
     # Loads the movies to database from local json file
     def demo_button_action(self):
-        local_file = open(r"tests\test_json.json", encoding="utf-8")
+        local_file = open(r"test_json.json", encoding="utf-8")
         all_movies = responses_to_movies(local_file.read())
         dbc.clear_table(self.db_name, self.table_name)
         dbc.load_to_db(self.db_name, self.table_name, all_movies)
