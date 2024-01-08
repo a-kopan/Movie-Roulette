@@ -1,9 +1,2 @@
-tkinter
-json
-requests
-sys
-sqlite3
-idlelib.tooltip
-io
-PIL
-unittest
+requests==2.31.0
+Pillow==10.1.0
